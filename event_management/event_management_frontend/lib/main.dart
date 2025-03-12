@@ -1,8 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:miniproj/pages/CreateEventScreen.dart';
 import 'package:miniproj/pages/ForgotPasswordPage%20.dart';
+import 'package:miniproj/pages/HomeScreen1.dart';
 import 'package:miniproj/pages/LoginApp.dart';
-/*import 'package:miniproj/pages/LoginApp.dart';*/
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,14 +23,18 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      title: 'Event Management System',
+      initialRoute: '/login', // Set the initial route to the login page
       routes: {
+        '/': (context) => HomeScreen1(),
+        '/login': (context) => LoginPage(), // Define the login route
+        '/create-event': (context) => CreateEventScreen(),
         '/forgot-password': (context) => ForgotPasswordPage(),
+        // Add other routes here
       },
     );
   }

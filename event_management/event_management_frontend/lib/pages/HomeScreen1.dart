@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:miniproj/pages/EventsScreen.dart';
 import 'package:miniproj/pages/dashboard.dart';
+import 'package:miniproj/pages/EventCreationScreen.dart'; // Ensure this import is present
 
 class HomeScreen1 extends StatelessWidget {
   const HomeScreen1({super.key});
@@ -8,17 +9,7 @@ class HomeScreen1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(''),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-          ),
-        ],
-      ),
+      // Removed the AppBar widget
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -87,7 +78,11 @@ class HomeScreen1 extends StatelessWidget {
       // Floating Action Button
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/create-event');
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const EventCreationScreen()),
+          );
         },
         child: const Icon(Icons.add),
       ),
