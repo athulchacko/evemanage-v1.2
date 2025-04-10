@@ -1,11 +1,11 @@
 buildscript {
-    ext.kotlin_version = '2.1.0' // Update to a newer Kotlin version
+    ext.kotlin_version = '1.8.10' // Update to a compatible Kotlin version
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2' // Updated Gradle Plugin
+        classpath 'com.android.tools.build:gradle:8.2.1' // Updated Gradle Plugin to 8.2.1
         classpath 'com.google.gms:google-services:4.4.2' // Firebase Google Services Plugin
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" // Updated Kotlin Plugin
     }

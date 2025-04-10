@@ -1,9 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:miniproj/pages/AttendeeRegistrationScreen.dart';
+import 'package:miniproj/pages/ForgotPasswordPage%20.dart' show ForgotPasswordScreen;
 import 'package:miniproj/pages/CreateEventScreen.dart';
-import 'package:miniproj/pages/ForgotPasswordPage%20.dart';
 import 'package:miniproj/pages/HomeScreen1.dart';
 import 'package:miniproj/pages/LoginApp.dart';
+import 'package:miniproj/pages/EventCreationScreen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +20,8 @@ void main() async {
         appId: "1:863293804008:web:3673d7bb5c046941bd285d",
         measurementId: "G-G4CJ435H2W"),
   );
-  runApp(const MyApp());
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -33,9 +37,21 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomeScreen1(),
         '/login': (context) => LoginPage(), // Define the login route
         '/create-event': (context) => CreateEventScreen(),
-        '/forgot-password': (context) => ForgotPasswordPage(),
+        '/forgot-password': (context) => ForgotPasswordScreen(),
+        '/create-workshop': (context) => CreateEventScreen(),
+        '/create-music-event': (context) => CreateEventScreen(),
+        '/create-sports-event': (context) => CreateEventScreen(),
+        '/create-conference': (context) => CreateEventScreen(),
+        '/create-webinar': (context) => CreateEventScreen(),
+        '/attendee-registration': (context) => AttendeeRegistrationScreen(eventId: ''), // Add AttendeeRegistrationScreen route
+        '/event-list': (context) =>
+           
+            EventCreationScreen(), // Add EventCreationScreen route
         // Add other routes here
       },
     );
   }
+}
+
+class ForgotPasswordPage {
 }

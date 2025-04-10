@@ -1,8 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:miniproj/pages/LoginApp.dart';
-import 'package:miniproj/pages/wrapper.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -22,6 +21,10 @@ class _SignUpPageState extends State<SignUpPage> {
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  String selectedRole = "user"; // Default role
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   get ii => null;
 
@@ -32,14 +35,41 @@ class _SignUpPageState extends State<SignUpPage> {
       });
 
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        // Create user with email and password
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
-        Get.offAll(() => const Wrapper());
+
+        // Get the user's UID
+        User? user = userCredential.user;
+        if (user != null) {
+          // Save user details and role in Firestore
+          await _firestore.collection("users").doc(user.uid).set({
+            "name": _usernameController.text.trim(),
+            "email": _emailController.text.trim(),
+            "role": selectedRole, // Save the selected role
+            "profilePic": "", // Placeholder for profile picture
+          });
+
+          print("✅ User added to Firestore!");
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Signup successful!")),
+          );
+
+          // Navigate to login page or home screen
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Signup failed: ${e.message}")),
+        );
       } catch (e) {
-        Get.snackbar("Sign Up Error", e.toString(),
-            backgroundColor: Colors.redAccent, colorText: Colors.white);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("An error occurred: $e")),
+        );
       } finally {
         setState(() {
           _isLoading = false;
@@ -51,17 +81,17 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      appBar: AppBar(title: const Text("Signup")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "Sign Up",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                "Create an Account",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
 
@@ -168,7 +198,26 @@ class _SignUpPageState extends State<SignUpPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
+
+              // Role Selection
+              const Text(
+                "Select Role",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              DropdownButton<String>(
+                value: selectedRole,
+                items: const [
+                  DropdownMenuItem(value: "user", child: Text("User")),
+                  DropdownMenuItem(value: "admin", child: Text("Admin")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedRole = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 30),
 
               // Sign Up Button
               SizedBox(

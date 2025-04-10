@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:miniproj/pages/AdminDashboardScreen.dart';
 import 'package:miniproj/pages/HomeScreen1.dart';
 import 'package:miniproj/pages/signup.dart';
 
@@ -14,58 +16,71 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool isPasswordVisible = false; // State variable for password visibility
 
-  // Login Function
-   // Login Function with Improved Error Handling
-  Future<void> loginUser() async {
+  // Login Function with Improved Error Handling
+  Future<void> loginUser(
+      BuildContext context,
+      TextEditingController emailController,
+      TextEditingController passwordController) async {
+    FirebaseAuth _auth = FirebaseAuth.instance;
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
     setState(() {
       isLoading = true;
     });
 
     try {
-      await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      // Navigate to Home Screen after successful login
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen1()),
-      );
-    } on FirebaseAuthException catch (e) {
-      String errorMessage;
+      // Get the logged-in user's UID
+      String uid = userCredential.user!.uid;
+      print("✅ User logged in with UID: $uid");
 
-      switch (e.code) {
-        case 'invalid-email':
-          errorMessage = 'Invalid email format.';
-          break;
-        case 'user-not-found':
-          errorMessage = 'No user found with this email.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Incorrect password. Please try again.';
-          break;
-        case 'user-disabled':
-          errorMessage = 'This account has been disabled. Contact support.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Too many attempts. Try again later.';
-          break;
-        case 'network-request-failed':
-          errorMessage = 'Network error. Check your connection and try again.';
-          break;
-        default:
-          errorMessage = 'Login failed. Please try again later.';
+      // Fetch user role from Firestore
+      DocumentSnapshot userDoc =
+          await _firestore.collection("users").doc(uid).get();
+
+      if (userDoc.exists) {
+        String role = userDoc.get("role");
+        print("✅ User role: $role");
+
+        // Fetch additional user details
+        await fetchUserDetails();
+
+        // Navigate based on role
+        if (role == "admin") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) =>  AdminDashboard()),
+          );
+        } else if (role == "user") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen1()),
+          );
+        } else {
+          print("⚠️ Unknown role: $role");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Unknown user role")),
+          );
+        }
+      } else {
+        print("⚠️ User document does not exist in Firestore!");
+        throw Exception("User role not found!");
       }
-
+    } on FirebaseAuthException catch (e) {
+      print("🔥 FirebaseAuthException: ${e.message}");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
+        SnackBar(content: Text("Login failed: ${e.message}")),
       );
     } catch (e) {
+      print("🔥 Exception: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An unexpected error occurred: ${e.toString()}')),
+        SnackBar(content: Text("An error occurred: $e")),
       );
     } finally {
       setState(() {
@@ -74,6 +89,28 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> fetchUserDetails() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("⚠️ No user signed in!");
+      return;
+    }
+
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        print("✅ User Data: ${userDoc.data()}");
+      } else {
+        print("⚠️ User document does not exist in Firestore!");
+      }
+    } catch (e) {
+      print("🔥 Error fetching user details: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,10 +155,21 @@ class _LoginPageState extends State<LoginPage> {
                 // Password Input
                 TextField(
                   controller: passwordController,
-                  obscureText: true,
+                  obscureText: !isPasswordVisible, // Toggle visibility
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: const Icon(Icons.visibility_off),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
+                    ),
                     hintText: "Enter Password",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -158,7 +206,10 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: isLoading ? null : loginUser,
+                    onPressed: isLoading
+                        ? null
+                        : () => loginUser(
+                            context, emailController, passwordController),
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text("Login",
@@ -181,7 +232,8 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SignUpPage()),
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpPage()),
                         );
                       },
                       child: const Text("Signup",
@@ -197,22 +249,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-/*
-class HomeScreen1 extends StatelessWidget {
-  const HomeScreen1({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Screen'),
-      ),
-      body: const Center(
-        child: Text('Welcome to Home Screen!'),
-      ),
-    );
-    
-class declaration. To fix this, you need to uncomment the HomeScreen1 class.
-
-  }
-} */

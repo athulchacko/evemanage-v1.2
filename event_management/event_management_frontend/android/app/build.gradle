@@ -1,49 +1,35 @@
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id "dev.flutter.flutter-gradle-plugin"
-    id "com.google.gms.google-services" // Firebase plugin
-}
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'dev.flutter.flutter-gradle-plugin'
 
 android {
     namespace = "com.example.miniproj" // Change this to your actual application ID
-    compileSdk = 34
-   plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id "dev.flutter.flutter-gradle-plugin"
-    id "com.google.gms.google-services" // Firebase plugin
-}
-
-android {
-    namespace = "com.example.miniproj" // Change this to your actual application ID
-    compileSdk = 34
-    ndkVersion = "21.3.6528147"
+    compileSdkVersion 35
+    ndkVersion "21.3.6528147"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility =   JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        applicationId = "com.example.miniproj" // Update with your app's package name
-        minSdk = 23
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        applicationId "com.example.miniproj" // Update with your app's package name
+        minSdkVersion 23 // Updated to 23 as required by firebase_auth
+        targetSdkVersion 35
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Currently using debug signing for testing.
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.debug
         }
     }
 }
@@ -56,43 +42,5 @@ dependencies {
 }
 
 flutter {
-    source = "../.."
-}
-
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility =   JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
-    defaultConfig {
-        applicationId = "com.example.miniproj" // Update with your app's package name
-        minSdk = 23
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-    }
-
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Currently using debug signing for testing.
-            signingConfig = signingConfigs.debug
-        }
-    }
-}
-
-dependencies {
-    implementation platform('com.google.firebase:firebase-bom:33.9.0') // Firebase BOM
-    implementation 'com.google.firebase:firebase-analytics:21.0.0' // Firebase Analytics
-    implementation 'com.google.firebase:firebase-auth:21.0.0' // Firebase Authentication
-    implementation 'com.google.firebase:firebase-firestore:24.0.0' // Firebase Firestore
-}
-
-flutter {
-    source = "../.."
+    source '../..'
 }

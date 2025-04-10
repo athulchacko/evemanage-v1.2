@@ -1,81 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class ForgotPasswordPage extends StatelessWidget {
-  const ForgotPasswordPage({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
+
+  @override
+  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final _emailController = TextEditingController();
+
+  Future<void> _resetPassword() async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.text);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password reset link sent! Check your email.")),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${error.toString()}")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Forgot Password")),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back Button
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(height: 10),
-
-            // Title
-            const Text(
-              "Forgot Password",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Subtitle
-            const Text(
-              "Please enter your email address to request a password reset",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-
-            const SizedBox(height: 30),
-
-            // Email Input Field
             TextField(
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.email),
-                hintText: "abc@email.com",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: "Enter your email"),
             ),
-
             const SizedBox(height: 20),
-
-            // Send Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[700],
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  // Handle password reset request
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "Send",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, color: Colors.white),
-                  ],
-                ),
-              ),
+            ElevatedButton(
+              onPressed: _resetPassword,
+              child: const Text("Send Reset Link"),
             ),
           ],
         ),
