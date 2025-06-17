@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Vendor = require("./models/Vendor");
 
 // ✅ MongoDB Atlas Connection String (Replace <your_connection_string>)
-mongoose.connect("mongodb+srv://athulchacko221:athul123456@evemanage.eym6k.mongodb.net/", ).then(() => {
+mongoose.connect("confidential", ).then(() => {
   console.log("✅ Connected to MongoDB Atlas");
 }).catch(err => {
   console.error("🔥 MongoDB Connection Error:", err);
